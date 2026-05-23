@@ -1,25 +1,11 @@
-🌱 Open‑Meteo Environmental Analytics Pipeline
+🌼 Green Thumbs & Runny Noses: A Forecasting Tool for Gardeners with Allergies
+Open‑Meteo Environmental Analytics Pipeline
 Weather • Soil • Air Quality • Pollen • Feature Engineering • Decision Flags
+
 This project builds a complete environmental decision‑support dataset using the Open‑Meteo API suite. It integrates weather, soil, air quality, and pollen data into a single engineered dataset with custom scoring models and operational flags.
 
 The final output is a clean, analysis‑ready CSV suitable for dashboards, SQL databases, and reporting.
 
-📁 Repository Structure
-Code
-/open-meteo-project
-│
-├── data/
-│   └── merged_open_meteo_final.csv
-│
-├── notebooks/
-│   └── open_meteo_pipeline.ipynb
-│
-└── README.md
-notebooks/ contains the full Google Colab workflow
-
-data/ contains the final engineered dataset
-
-README.md documents the project, methodology, and features
 🌤️ Data Sources
 All data is retrieved programmatically using the Open‑Meteo API:
 
