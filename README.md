@@ -1,170 +1,174 @@
-🌼 Green Thumbs & Runny Noses: A Forecasting Tool for Gardeners with Allergies
+Green Thumbs & Runny Noses: A Forecasting Tool for Gardeners with Allergies
 Open‑Meteo Environmental Analytics Pipeline
 Weather • Soil • Air Quality • Pollen • Feature Engineering • Decision Flags
 
 This project builds a complete environmental decision‑support dataset using the Open‑Meteo API suite. It integrates weather, soil, air quality, and pollen data into a single engineered dataset with custom scoring models and operational flags.
 
-The final output is a clean, analysis‑ready CSV suitable for dashboards, SQL databases, and reporting.
+pipelines.ipynb
+Purpose:  
+End‑to‑end ETL pipeline that fetches environmental data from Open‑Meteo APIs and produces a unified dataset for database loading.
 
-🌤️ Data Sources
-All data is retrieved programmatically using the Open‑Meteo API:
+Workflow:
 
-Weather & Soil
+Fetches hourly weather, soil, air quality, and pollen data for Louisville, KY
 
-Temperature
+Converts timestamps to local time (America/New_York)
 
-Humidity
+Normalizes JSON responses into pandas DataFrames
 
-Precipitation probability
+Merges all variables into a single hourly dataset
 
-Wind speed
+Engineers composite scores (planting readiness, allergy risk)
 
-Soil temperature
+Generates boolean environmental risk flags
 
-Soil moisture
+Exports final dataset to data/merged_open_meteo_final.csv
 
-Air Quality
+Key Features:
 
-PM2.5, PM10
+Uses three Open‑Meteo endpoints (Weather/Soil, Air Quality, Pollen)
 
-Ozone, NO₂, SO₂, CO
+Ensures consistent timestamp alignment across APIs
 
-U.S. AQI and pollutant‑specific AQI components
+Handles missing values and unit conversions
 
-Pollen
+Produces a clean, analysis‑ready dataset for PostgreSQL loading
 
-Grass
+Usage:
 
-Ragweed
+Code
+Run all cells in pipelines.ipynb
+schema.ipynb
+Purpose:  
+Programmatically generates the full SQL schema (documentation + CREATE TABLE statements) and writes it to schema.sql.
 
-Birch
+Demonstrates:
 
-Alder
+Constructing SQL schema strings in Python
 
-Mugwort
+Embedding documentation directly into SQL files
 
-Olive
+Writing .sql files from Python
 
-All timestamps are converted to local time and standardized for merging.
+Ensuring reproducible schema generation for database creation
 
-🔧 ETL Pipeline Summary
-The notebook performs the following steps:
+Usage:
 
-API Requests  
-Pulls hourly weather, soil, air quality, and pollen data.
+Code
+Run all cells in schema.ipynb
+schema.sql will be created automatically
+initial_load.py
+Purpose:  
+Creates PostgreSQL tables using schema.sql and loads the processed dataset into the fact table.
 
-Cleaning & Standardization
+Workflow:
 
-Lowercase, underscore‑safe column names
+Connects to PostgreSQL using psycopg2
 
-Datetime parsing and timezone removal
+Executes schema.sql to create all tables
 
-Missing pollen values filled with zero for scoring
+Loads merged_open_meteo_final.csv into pandas
 
-Merging  
-Weather/soil + air/pollen merged on a clean datetime index.
+Inserts rows into fact_environmental_conditions
 
-Feature Engineering
+Closes database connection cleanly
 
-Two composite scores
+Key Features:
 
-Seven operational flags
+Uses parameterized SQL inserts
 
-One best‑day composite flag
+Includes error handling for database operations
 
-Final Export  
-merged_open_meteo_final.csv
+Ensures reproducible table creation and loading
 
-🌿 Composite Scores
-1. Planting Readiness Score (0–100)
-A weighted model estimating planting suitability using:
+Usage:
 
-Soil temperature (40%)
+Code
+python initial_load.py
+Learning Outcomes
+Students completing this project will:
 
-Precipitation probability (20%)
+Understand multi‑API extraction using Open‑Meteo
 
-Wind speed (20%)
+Learn how to normalize and merge heterogeneous environmental datasets
 
-Soil moisture (20%)
+Practice timestamp handling and timezone conversion
 
-2. Allergy Risk Score (0–100)
-A weighted model estimating allergy burden using:
+Build a star schema with dimension and fact tables
 
-PM2.5 (25%)
+Generate SQL schema files programmatically
 
-Ozone (15%)
+Load structured data into PostgreSQL using Python
 
-Average pollen concentration (60%)
+Interpret ERDs and relational database design principles
 
-Both scores are clipped to the 0–100 range.
+Data Reference
+Environmental Variables
+The merged dataset includes:
 
-🚦 Operational Flags (Binary Indicators)
-These flags convert environmental conditions into simple, actionable signals.
+Weather: temperature, wind speed, precipitation probability
 
-Flag	Meaning	Threshold
-high_wind_flag	Unsafe wind conditions	wind_speed_10m > 15 mph
-rain_expected_flag	Rain likely	precipitation_probability > 50%
-soil_too_wet_flag	Soil unsuitable for planting	soil_moisture_0_to_1cm > 0.35
-poor_air_quality_flag	AQI unhealthy for sensitive groups	us_aqi > 100
-high_pollen_flag	High allergy burden	avg pollen > 150
-heat_stress_flag	Heat caution threshold	temperature_2m ≥ 85°F
-respiratory_risk_flag	Elevated respiratory burden	allergy_risk ≥ 60
+Soil: soil temperature, soil moisture
 
+Air Quality: PM2.5, ozone, AQI
 
-⭐ Best Overall Day Flag
-A composite indicator identifying optimal outdoor days:
+Pollen: grass, ragweed, birch, alder, mugwort, olive
 
-A day is marked as best_overall_day_flag = 1 when:
+Composite Scores: planting readiness, allergy risk
 
-Planting readiness ≥ 65
+Flags: high wind, rain expected, poor air quality, high pollen, etc.
 
-Allergy risk ≤ 40
+Source APIs
+All data is sourced from:
 
-No rain expected
+👉 Open‑Meteo API  
+https://open-meteo.com/en/docs
 
-No high wind
+Free access
 
-AQI ≤ 100
+No authentication required
 
-This flag summarizes multiple environmental factors into a single “go/no‑go” signal.
+High‑resolution hourly environmental data
 
-📦 Final Deliverable
-merged_open_meteo_final.csv
-This file contains:
+Supports weather, soil, air quality, and pollen endpoints
 
-Clean hourly timestamps
+Requirements
+Install dependencies from requirements.txt:
 
-Weather + soil variables
+Code
+pip install -r requirements.txt
+Key libraries:
 
-Air quality + pollen variables
+requests — API calls
 
-Composite scores
+pandas — data transformation
 
-Seven operational flags
+openmeteo_requests — optimized Open‑Meteo client
 
-Best overall day indicator
+psycopg2-binary — PostgreSQL connection
 
-It is fully ready for:
+numpy — numeric operations
 
-SQL loading
+ERD Reference
+The ERD (database/erd.png) illustrates:
 
-Dashboard creation
+dim_datetime (time dimension)
 
-Modeling
+dim_environmental_factors (location dimension)
 
-Reporting
+fact_environmental_conditions (central fact table)
 
-🔁 Reproducibility
-The entire pipeline is contained in:
+Relationships follow a star schema with 1‑to‑many cardinality.
 
-notebooks/open_meteo_pipeline.ipynb
+Usage Summary
+To reproduce the full pipeline:
 
-Running the notebook will regenerate:
+Run pipelines.ipynb → generates merged CSV
 
-all API pulls
+Run schema.ipynb → generates schema.sql
 
-all transformations
+Run initial_load.py → creates tables + loads data
 
-all engineered features
+View ERD in database/erd.png
 
-the final CSV
+Query your PostgreSQL database
