@@ -24,6 +24,10 @@ Generates boolean environmental risk flags
 
 Exports final dataset to data/merged_open_meteo_final.csv
 
+Pipeline Flowchart
+This diagram illustrates the data extraction and transformation process used to generate the final environmental dataset.
+![Environmental Conditions Pipeline](assets/environmental_conditions_flowchart.png)
+
 Key Features:
 
 Uses three Open‑Meteo endpoints (Weather/Soil, Air Quality, Pollen)
