@@ -4,6 +4,18 @@ Weather • Soil • Air Quality • Pollen • Feature Engineering • Decision
 
 This project builds a complete environmental decision‑support dataset using the Open‑Meteo API suite. It integrates weather, soil, air quality, and pollen data into a single engineered dataset with custom scoring models and operational flags.
 
+Pipeline Flowchart
+The diagram below illustrates the full data extraction and transformation workflow used in the Environmental Conditions Database Application. It mirrors the structure demonstrated in the course example and shows how external data sources, API calls, and processing scripts interact to produce the final merged dataset.
+
+The flowchart highlights:
+
+External data sources (Open‑Meteo API and reference files)
+
+User‑defined parameters (time range selection)
+
+The ETL pipeline steps (API requests, transformations, merging)
+
+Scripts
 pipelines.ipynb
 Purpose:  
 End‑to‑end ETL pipeline that fetches environmental data from Open‑Meteo APIs and produces a unified dataset for database loading.
@@ -24,10 +36,6 @@ Generates boolean environmental risk flags
 
 Exports final dataset to data/merged_open_meteo_final.csv
 
-Pipeline Flowchart
-This diagram illustrates the data extraction and transformation process used to generate the final environmental dataset.
-![Environmental Conditions Pipeline](assets/environmental_conditions_flowchart.png)
-
 Key Features:
 
 Uses three Open‑Meteo endpoints (Weather/Soil, Air Quality, Pollen)
@@ -39,9 +47,9 @@ Handles missing values and unit conversions
 Produces a clean, analysis‑ready dataset for PostgreSQL loading
 
 Usage:
-
 Code
 Run all cells in pipelines.ipynb
+
 schema.ipynb
 Purpose:  
 Programmatically generates the full SQL schema (documentation + CREATE TABLE statements) and writes it to schema.sql.
@@ -57,10 +65,10 @@ Writing .sql files from Python
 Ensuring reproducible schema generation for database creation
 
 Usage:
-
 Code
 Run all cells in schema.ipynb
 schema.sql will be created automatically
+
 initial_load.py
 Purpose:  
 Creates PostgreSQL tables using schema.sql and loads the processed dataset into the fact table.
@@ -86,9 +94,9 @@ Includes error handling for database operations
 Ensures reproducible table creation and loading
 
 Usage:
-
 Code
 python initial_load.py
+
 Learning Outcomes
 Students completing this project will:
 
@@ -107,20 +115,44 @@ Load structured data into PostgreSQL using Python
 Interpret ERDs and relational database design principles
 
 Data Reference
-Environmental Variables
-The merged dataset includes:
+Environmental Dataset
+The data/merged_open_meteo_final.csv file contains:
 
-Weather: temperature, wind speed, precipitation probability
+Hourly weather variables (temperature, wind speed, precipitation probability)
 
-Soil: soil temperature, soil moisture
+Soil conditions (soil temperature, soil moisture)
 
-Air Quality: PM2.5, ozone, AQI
+Air quality metrics (PM2.5, ozone, AQI)
 
-Pollen: grass, ragweed, birch, alder, mugwort, olive
+Pollen counts (grass, ragweed, birch, alder, mugwort, olive)
 
-Composite Scores: planting readiness, allergy risk
+Composite scores (planting readiness, allergy risk)
 
-Flags: high wind, rain expected, poor air quality, high pollen, etc.
+Boolean environmental flags (high wind, rain expected, poor air quality, etc.)
+
+Reference File
+The data/environmental_reference.xlsx file contains:
+
+Variable names
+
+Descriptions
+
+Units of measurement
+
+Source API mapping
+
+This mirrors the structure of the weather code reference file used in the course example.
+
+ERD Reference
+The ERD (assets/erd.png) illustrates:
+
+dim_datetime (time dimension)
+
+dim_environmental_factors (location dimension)
+
+fact_environmental_conditions (central fact table)
+
+Relationships follow a star schema with 1‑to‑many cardinality.
 
 Source APIs
 All data is sourced from:
@@ -153,17 +185,6 @@ psycopg2-binary — PostgreSQL connection
 
 numpy — numeric operations
 
-ERD Reference
-The ERD (database/erd.png) illustrates:
-
-dim_datetime (time dimension)
-
-dim_environmental_factors (location dimension)
-
-fact_environmental_conditions (central fact table)
-
-Relationships follow a star schema with 1‑to‑many cardinality.
-
 Usage Summary
 To reproduce the full pipeline:
 
@@ -173,6 +194,6 @@ Run schema.ipynb → generates schema.sql
 
 Run initial_load.py → creates tables + loads data
 
-View ERD in database/erd.png
+View ERD in assets/erd.png
 
 Query your PostgreSQL database
