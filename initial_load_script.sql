@@ -1,13 +1,14 @@
 /* ============================================================
    STAR SCHEMA TABLES
    ============================================================ */
-DROP TABLE IF EXISTS dim_datetime CASCADE;
-DROP TABLE IF EXISTS dim_environmental_factors CASCADE;
-DROP TABLE IF EXISTS dim_environmental_factors CASCADE;
 
+-- Drop fact first (because it depends on dimensions)
+DROP TABLE IF EXISTS fact_environmental_conditions;
+DROP TABLE IF EXISTS dim_datetime;
+DROP TABLE IF EXISTS dim_environmental_factors;
 
 CREATE TABLE IF NOT EXISTS dim_datetime (
-    datetime_id SERIAL PRIMARY KEY,
+    datetime_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     timestamp_local TIMESTAMP,
     year INT,
     month INT,
@@ -17,16 +18,18 @@ CREATE TABLE IF NOT EXISTS dim_datetime (
 );
 
 CREATE TABLE IF NOT EXISTS dim_environmental_factors (
-    env_id SERIAL PRIMARY KEY,
+    env_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     latitude FLOAT,
     longitude FLOAT,
     location_name VARCHAR(100)
 );
 
 CREATE TABLE IF NOT EXISTS fact_environmental_conditions (
-    fact_id SERIAL PRIMARY KEY,
-    datetime_id INT REFERENCES dim_datetime(datetime_id),
-    env_id INT REFERENCES dim_environmental_factors(env_id),
+    fact_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    -- Foreign keys
+    datetime_id BIGINT REFERENCES dim_datetime(datetime_id),
+    env_id BIGINT REFERENCES dim_environmental_factors(env_id),
 
     temperature_2m FLOAT,
     wind_speed_10m FLOAT,
@@ -118,11 +121,9 @@ SELECT DISTINCT
 FROM staging_environmental_raw
 ORDER BY date;
 
-
--- dim_environmental_factors (single location for your dataset)
+-- dim_environmental_factors (single location)
 INSERT INTO dim_environmental_factors (latitude, longitude, location_name)
-VALUES (38.2527, -85.7585, 'Louisville, KY')
-ON CONFLICT DO NOTHING;
+VALUES (38.2527, -85.7585, 'Louisville, KY');
 
 /* ============================================================
    POPULATE FACT TABLE
@@ -187,9 +188,64 @@ FROM staging_environmental_raw s
 JOIN dim_datetime d
   ON d.timestamp_local = s.date;
 
-SELECT COUNT(*) FROM staging_environmental_raw;
-SELECT COUNT(*) FROM dim_datetime;
-SELECT COUNT(*) FROM fact_environmental_conditions;
+/* ============================================================
+   VALIDATION COUNTS
+   ============================================================ */
 
-SELECT MIN(date), MAX(date) FROM staging_environmental_raw;
+SELECT COUNT(*) AS staging_rows FROM staging_environmental_raw;
+SELECT COUNT(*) AS dim_datetime_rows FROM dim_datetime;
+SELECT COUNT(*) AS fact_rows FROM fact_environmental_conditions;
 
+SELECT MIN(date) AS min_date, MAX(date) AS max_date FROM staging_environmental_raw;
+
+/* ============================================================
+   VIEW TABLES & STRUCTURE
+   ============================================================ */
+
+-- List all tables
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+ORDER BY table_name;
+
+-- Column definitions
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'dim_datetime';
+
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'dim_environmental_factors';
+
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'fact_environmental_conditions';
+
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'staging_environmental_raw';
+
+-- Preview rows
+SELECT * FROM dim_datetime LIMIT 5;
+SELECT * FROM dim_environmental_factors LIMIT 5;
+SELECT * FROM fact_environmental_conditions LIMIT 5;
+SELECT * FROM staging_environmental_raw LIMIT 5;
+
+-- Show foreign keys
+SELECT
+    tc.constraint_name,
+    tc.table_name,
+    kcu.column_name,
+    ccu.table_name AS foreign_table,
+    ccu.column_name AS foreign_column
+FROM 
+    information_schema.table_constraints AS tc
+JOIN 
+    information_schema.key_column_usage AS kcu
+      ON tc.constraint_name = kcu.constraint_name
+JOIN 
+    information_schema.constraint_column_usage AS ccu
+      ON ccu.constraint_name = tc.constraint_name
+WHERE 
+    tc.constraint_type = 'FOREIGN KEY'
+ORDER BY tc.table_name;
