@@ -1,0 +1,16 @@
+[
+  {
+    "constraint_name": "fact_environmental_conditions_datetime_id_fkey",
+    "table_name": "fact_environmental_conditions",
+    "column_name": "datetime_id",
+    "foreign_table": "dim_datetime",
+    "foreign_column": "datetime_id"
+  },
+  {
+    "constraint_name": "fact_environmental_conditions_env_id_fkey",
+    "table_name": "fact_environmental_conditions",
+    "column_name": "env_id",
+    "foreign_table": "dim_environmental_factors",
+    "foreign_column": "env_id"
+  }
+]
