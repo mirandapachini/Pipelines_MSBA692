@@ -249,3 +249,15 @@ JOIN
 WHERE 
     tc.constraint_type = 'FOREIGN KEY'
 ORDER BY tc.table_name;
+
+-- Adding a JSONB column to store raw JSON data
+ALTER TABLE staging_environmental_raw
+ADD COLUMN raw_data JSONB;
+
+-- Or, if you need a new table to store specific JSON elements
+CREATE TABLE IF NOT EXISTS api_data (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    extracted_at TIMESTAMP DEFAULT NOW(),
+    some_value TEXT,
+    nested_value JSONB
+);
