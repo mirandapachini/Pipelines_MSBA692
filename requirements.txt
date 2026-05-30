@@ -1,0 +1,13 @@
+python
+logging
+os
+requests
+pandas
+sqlalchemy
+dotenv
+datetime
+requests
+pandas
+SQLAlchemy
+python-dotenv
+psycopg2-binary
