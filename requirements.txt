@@ -1,13 +1,7 @@
-python
-logging
-os
-requests
+openmeteo-requests
+requests-cache
+retry-requests
 pandas
+numpy
 sqlalchemy
-dotenv
-datetime
-requests
-pandas
-SQLAlchemy
-python-dotenv
 psycopg2-binary
